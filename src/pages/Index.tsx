@@ -1,13 +1,64 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginCard } from "@/components/auth/LoginCard";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { StudentDashboard } from "@/components/dashboard/StudentDashboard";
+import { MessManagerDashboard } from "@/components/dashboard/MessManagerDashboard";
+import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+  const [user, setUser] = useState<{
+    role: string;
+    username: string;
+  } | null>(null);
+  const { toast } = useToast();
+
+  const handleLogin = (role: string, credentials: { username: string; password: string }) => {
+    // Simulate login - in real app, this would validate against backend
+    setUser({ role, username: credentials.username });
+    toast({
+      title: "Login Successful",
+      description: `Welcome, ${credentials.username}!`,
+    });
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+  };
+
+  const renderDashboard = () => {
+    switch (user?.role) {
+      case "student":
+        return <StudentDashboard />;
+      case "mess-manager":
+        return <MessManagerDashboard />;
+      case "admin":
+        return <AdminDashboard />;
+      default:
+        return <div>Invalid role</div>;
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
+        <LoginCard onLogin={handleLogin} />
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <DashboardLayout
+      userRole={user.role}
+      username={user.username}
+      onLogout={handleLogout}
+    >
+      {renderDashboard()}
+    </DashboardLayout>
   );
 };
 
